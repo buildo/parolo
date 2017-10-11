@@ -66,8 +66,8 @@ function verify(data, callback) {
 // Lambda handler
 exports.handler = (data, context, callback) => {
   console.log('Received message:\n', JSON.stringify(data, null, 2));
-  if (data.type === 'message') { // https://api.slack.com/events/message
-    parolo(data).then(() => {
+  if (data.type === 'event_callback') { // https://api.slack.com/events/message
+    parolo(data.event).then(() => {
       client.end();
       callback();
     });
