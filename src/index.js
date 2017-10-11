@@ -23,8 +23,6 @@ function insertMessageInDB(message) {
 }
 
 function parolo(message) {
-  console.log('Received message:\n', JSON.stringify(message, null, 2));
-
   return client.connect().then(() => {
 
     const maybeGetUser = (message) => {
@@ -67,6 +65,7 @@ function verify(data, callback) {
 
 // Lambda handler
 exports.handler = (data, context, callback) => {
+  console.log('Received message:\n', JSON.stringify(data, null, 2));
   if (data.type === 'message') { // https://api.slack.com/events/message
     parolo(data).then(() => {
       client.end();
