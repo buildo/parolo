@@ -32,7 +32,7 @@ const parolo = () => {
         return get('https://slack.com/api/channels.list')
           .then(res => {
             const channels = res.data.channels;
-            const asyncMethods = channels.map(c => () => get('https://slack.com/api/channels.history', { channel: c.id, count: 1000 }));
+            const asyncMethods = channels.map(c => () => get('https://slack.com/api/channels.history', { channel: c.id, count: process.env.SLACK_MESSAGE_COUNT || 1000 }));
 
             return stagger(asyncMethods, { maxOngoingMethods: 1, perSecond: Infinity })
               .then(_res => {
