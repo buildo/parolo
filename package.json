@@ -27,7 +27,7 @@
     "lodash": "^4.17.4",
     "pg": "^7.3.0",
     "pg-format": "^1.0.4",
-    "staggerjs": "^1.1.0"
+    "staggerjs": "^1.2.0"
   },
   "devDependencies": {}
 }

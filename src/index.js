@@ -34,9 +34,12 @@ const parolo = () => {
             const channels = res.data.channels;
             const asyncMethods = channels.map(c => () => get('https://slack.com/api/channels.history', { channel: c.id, count: process.env.SLACK_MESSAGE_COUNT || 1000 }));
 
-            return stagger(asyncMethods, { maxOngoingMethods: 1, perSecond: Infinity })
+            return stagger(asyncMethods, { maxOngoingMethods: Infinity, perSecond: 0.9 })
               .then(_res => {
                 const res = _res.map((r, i) => {
+                  if (!r.data) {
+                    console.log(r.message);
+                  }
                   r.data.messages = r.data.messages.map(m => {
                     m.channel = channels[i];
                     m.member = members.filter(u => u.id === m.user)[0];

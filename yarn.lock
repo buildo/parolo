@@ -113,9 +113,9 @@ split@^1.0.0:
   dependencies:
     through "2"
 
-staggerjs@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/staggerjs/-/staggerjs-1.1.0.tgz#dd5a282e28613b5be2db7a52cc9a364e4f08a781"
+staggerjs@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/staggerjs/-/staggerjs-1.2.0.tgz#be8d3728648951eb819b636c963f64898a514347"
   dependencies:
     tcomb "^3"
     throttle-function "^0.1.0"
