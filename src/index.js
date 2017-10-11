@@ -12,7 +12,7 @@ function get(url, params) {
   });
 }
 
-function insertMessageInDB(message) {
+function insertMessageInDB(message, client) {
   const text = 'INSERT INTO slack_messages(id, ts, thread_ts, user_id, text, channel_id, channel_name, user_is_bot, posted_on, subtype, user_name, user_real_name, team_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *'
   const timestamp = parseFloat(message.ts) * 1000;
   const values = [message.channel.name + '_' + message.ts, message.ts, message.thread_ts, message.user, message.text, message.channel.id, message.channel.name, message.subtype === 'bot_message', new Date(timestamp).toISOString().slice(0, 19), message.subtype, message.member && message.member.name, message.member && message.member.real_name, message.member && message.member.team_id];
@@ -47,7 +47,7 @@ function parolo(message, client) {
             message.channel = channel;
             message.member = user;
 
-            return insertMessageInDB(message);
+            return insertMessageInDB(message, client);
           });
       });
   });
