@@ -2,10 +2,8 @@
   "name": "parolo",
   "version": "1.0.0",
   "description": "",
-  "main": "src",
-  "scripts": {
-    "start": "node ./index.js"
-  },
+  "main": "",
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git@github.com:buildo/parolo"
@@ -24,10 +22,7 @@
   "homepage": "https://github.com/buildo/parolo",
   "dependencies": {
     "axios": "^0.16.2",
-    "lodash": "^4.17.4",
-    "pg": "^7.3.0",
-    "pg-format": "^1.0.4",
-    "staggerjs": "^1.2.0"
+    "pg": "^7.3.0"
   },
   "devDependencies": {}
 }

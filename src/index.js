@@ -1,16 +1,11 @@
 const axios = require('axios');
-const _ = require('lodash');
-const stagger = require('staggerjs').default;
 const { Client } = require('pg');
-const format = require('pg-format');
 const client = new Client(); // picks settings from process.env
-
-const startTime = Date.now();
 
 function get(url, params) {
   return axios({
     url,
-    params: _.assign({
+    params: Object.assign({
       token: process.env.SLACK_TOKEN,
       pretty: 1
     }, params),
@@ -18,58 +13,55 @@ function get(url, params) {
   });
 }
 
-function end() {
-  client.end();
-  process.exit();
+function insertMessageInDB(message) {
+  const text = 'INSERT INTO slack_messages(id, ts, thread_ts, user_id, text, channel_id, channel_name, user_is_bot, posted_on, subtype, user_name, user_real_name, team_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *'
+  const timestamp = parseFloat(message.ts) * 1000;
+  const values = [message.channel.name + '_' + message.ts, message.ts, message.thread_ts, message.user, message.text, message.channel.id, message.channel.name, message.subtype === 'bot_message', new Date(timestamp).toISOString().slice(0, 19), message.subtype, message.member && message.member.name, message.member && message.member.real_name, message.member && message.member.team_id];
+  return client.query(text, values)
+    .then(() => console.log('SUCCESS'))
+    .catch(e => console.log('ERROR', e.message));
 }
 
-const parolo = () => {
-  client.connect().then(() => {
-    return get('https://slack.com/api/users.list')
+function parolo(message) {
+  console.log('Received message:\n', JSON.stringify(message, null, 2));
+
+  return client.connect().then(() => {
+
+    const maybeGetUser = (message) => {
+      if (message.user) {
+        return get('https://slack.com/api/users.info', { user: message.user });
+      } else {
+        return Promise.resolve(null);
+      }
+    }
+
+    return maybeGetUser(message)
       .then(res => {
-        const members = res.data.members;
+        const user = res && res.data.user;
 
-        return get('https://slack.com/api/channels.list')
+        console.log('User info:\n', user ? JSON.stringify(user, null, 2) : 'NULL');
+
+        return get('https://slack.com/api/channels.info', { channel: message.channel })
           .then(res => {
-            const channels = res.data.channels;
-            const asyncMethods = channels.map(c => () => get('https://slack.com/api/channels.history', { channel: c.id, count: process.env.SLACK_MESSAGE_COUNT || 1000 }));
+            const channel = res.data.channel;
 
-            return stagger(asyncMethods, { maxOngoingMethods: Infinity, perSecond: 0.9 })
-              .then(_res => {
-                const res = _res.map((r, i) => {
-                  if (!r.data) {
-                    console.log(r.message);
-                  }
-                  r.data.messages = r.data.messages.map(m => {
-                    m.channel = channels[i];
-                    m.member = members.filter(u => u.id === m.user)[0];
-                    return m;
-                  })
-                  return r;
-                });
+            console.log('Channel info:\n', JSON.stringify(channel, null, 2));
 
-                const messages = _.flatten(_.flatten(res).map(res => res.data.messages));
-                console.log('GOT ' + messages.length +  ' messages');
-                const values = messages.map(message => {
-                  const timestamp = parseFloat(message.ts) * 1000;
-                  return [message.channel.name + '_' + message.ts, message.ts, message.thread_ts, message.user, message.text, message.channel.id, message.channel.name, message.subtype === 'bot_message', new Date(timestamp).toISOString().slice(0, 19), message.subtype, message.member && message.member.name, message.member && message.member.real_name, message.member && message.member.team_id];
-                });
+            message.channel = channel;
+            message.member = user;
 
-                return client.query('DELETE FROM slack_messages WHERE ' + messages.map(m => 'id = ' + '\'' + m.channel.name + '_' + m.ts + '\'').join(' OR '))
-                  .then(() => {
-                    console.log('Deleted pre-existing messages')
-                    return client.query(format('INSERT INTO slack_messages (id, ts, thread_ts, user_id, text, channel_id, channel_name, user_is_bot, posted_on, subtype, user_name, user_real_name, team_id) VALUES %L', values))
-                      .then(() => console.log('SUCCESS!', '(Done in:', Date.now() - startTime, 'ms)'))
-                      .catch((e) => console.log(e.message))
-                  })
-              });
-          })
-          .then(end)
-          .catch(end);
-      })
+            return insertMessageInDB(message);
+          });
+      });
   });
 };
 
-exports.handler = function (event, context, callback) {
-  parolo();
-}
+// Lambda handler
+exports.handler = (data, context, callback) => {
+  if (data.type === 'message') { // https://api.slack.com/events/message
+    parolo(data).then(() => {
+      client.end();
+      callback();
+    });
+  }
+};
