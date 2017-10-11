@@ -56,6 +56,15 @@ function parolo(message) {
   });
 };
 
+// Verify Url - https://api.slack.com/events/url_verification
+function verify(data, callback) {
+  if (data.token === process.env.SLACK_VERIFICATION_TOKEN) {
+    callback(null, data.challenge);
+  } else {
+    callback('Verification failed');
+  }
+}
+
 // Lambda handler
 exports.handler = (data, context, callback) => {
   if (data.type === 'message') { // https://api.slack.com/events/message
@@ -63,5 +72,7 @@ exports.handler = (data, context, callback) => {
       client.end();
       callback();
     });
+  } else if (data.type === 'url_verification') {
+    verify(data, callback);
   }
 };
