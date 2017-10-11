@@ -1,6 +1,5 @@
 const axios = require('axios');
 const { Client } = require('pg');
-const client = new Client(); // picks settings from process.env
 
 function get(url, params) {
   return axios({
@@ -22,7 +21,7 @@ function insertMessageInDB(message) {
     .catch(e => console.log('ERROR', e.message));
 }
 
-function parolo(message) {
+function parolo(message, client) {
   return client.connect().then(() => {
 
     const maybeGetUser = (message) => {
@@ -66,8 +65,11 @@ function verify(data, callback) {
 // Lambda handler
 exports.handler = (data, context, callback) => {
   console.log('Received message:\n', JSON.stringify(data, null, 2));
+
+  const client = new Client(); // picks settings from process.env
+
   if (data.type === 'event_callback') { // https://api.slack.com/events/message
-    parolo(data.event).then(() => {
+    parolo(data.event, client).then(() => {
       client.end();
       callback();
     });
