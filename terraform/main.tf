@@ -56,7 +56,6 @@ resource "aws_lambda_function" "parolo" {
     variables = {
       SLACK_VERIFICATION_TOKEN = "${var.slack_verification_token}"
       SLACK_TOKEN = "${var.slack_token}"
-      SLACK_MESSAGE_COUNT = "${var.slack_message_count}"
       PGHOST = "${var.pg_host}"
       PGDATABASE = "${var.pg_database}"
       PGUSER = "${var.pg_user}"
