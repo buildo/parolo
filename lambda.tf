@@ -3,8 +3,7 @@ resource "null_resource" "build" {
     command = "cd ${path.module}/lambda && yarn"
   }
   triggers {
-    package_json = "${sha1(file("${path.module}/lambda/package.json"))}"
-    yarn_lock = "${sha1(file("${path.module}/lambda/yarn.lock"))}"
+    always_trigger = "${uuid()}"
   }
 }
 
