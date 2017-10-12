@@ -12,26 +12,35 @@ Take note of the "Client ID" and the Client Secret".
 
 ## Deploy :rocket:
 
-Create a file `terraform/secret.tfvars` containing the following vars:
+In a new directory, create a file `main.tf` with the following content:
 
 ```
-slack_token = "" # Slack API Token
-slack_verification_token = "" Slack App Verification Token
-pg_host = "" Postgres host
-pg_database = "" Postgres DB name
-pg_user = "" Postgres user
-pg_password = "" Postgres password
-account_id = "" AWS Account ID
+module "parolo" {
+  source  = "github.com/buildo/parolo"
+
+  name = "" # Unique name for this parolo installation
+  aws_account_id = "" # AWS Account ID
+  aws_region = "" # AWS Region
+
+  slack_token = "" # Slack API Token
+  slack_verification_token = "" # Slack App Verification Token
+
+  pg_host = "" # Postgres host
+  pg_database = "" # Postgres DB name
+  pg_user = "" # Postgres user
+  pg_password = "" # Postgres password
+  account_id = "" # AWS Account ID
+}
 ```
 
 Then spin up the infra using Terraform:
 
 ```sh
-cd terraform
-terraform apply -var-file=secret.tfvars
+terraform init
+terraform apply
 ```
 
-It will create:
+This will create:
 
 * an AWS Lambda function
 * an AWS API Gateway

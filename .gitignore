@@ -2,6 +2,5 @@ node_modules
 *.log
 parolo.zip
 .terraform
-secret.tfvars
 terraform.tfstate
 terraform.tfstate.backup

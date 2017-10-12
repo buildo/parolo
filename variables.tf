@@ -1,9 +1,9 @@
-variable "region" {
-  default = "eu-central-1"
+variable "name" {
+  description = "A unique name for this parolo installation"
 }
 
-variable "account_id" {}
-
+variable "aws_account_id" {}
+variable "aws_region" {}
 variable "slack_token" {}
 variable "slack_verification_token" {}
 variable "pg_host" {}
