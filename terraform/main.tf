@@ -4,15 +4,16 @@ provider "aws" {
 
 resource "null_resource" "build" {
   provisioner "local-exec" {
-    command = "cd .. && yarn && cp -R node_modules src"
+    command = "cd ${path.module}/.. && yarn && cp -R node_modules src"
   }
 }
 
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  output_path = "parolo.zip"
+  output_path = "${path.module}/parolo.zip"
 
-  source_dir = "../src"
+  source_dir = "${path.module}/../src"
+  depends_on = ["null_resource.build"]
 }
 
 resource "aws_iam_role" "parolo_lambda" {
