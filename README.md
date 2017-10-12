@@ -10,7 +10,7 @@ Start here: https://api.slack.com/apps
 
 Take note of the "Client ID" and the Client Secret".
 
-## Deploy :rocket:
+## 2. Deploy :rocket:
 
 In a new directory, create a file `main.tf` with the following content:
 
